@@ -158,7 +158,7 @@ function injectModelsToProps (Comp, modelFieldDescriptors) {
   } else {
     return class extends React.PureComponent {
       render () {
-        return <Connected />
+        return <Connected {...this.props}/>
       }
     }
   }
@@ -208,7 +208,7 @@ function requireModel (...models) {
       } else {
         return class extends React.PureComponent {
           render () {
-            return <EnhancedComp />
+            return <EnhancedComp {...this.props}/>
           }
         }
       }
