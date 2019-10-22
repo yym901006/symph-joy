@@ -1,5 +1,5 @@
 import 'react-hot-loader/patch'
-import initJoy, * as joy from './'
+import initJoy, * as joy from './index'
 // import initOnDemandEntries from './on-demand-entries-client'
 import initWebpackHMR from './webpack-hot-middleware-client'
 

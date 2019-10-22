@@ -1,6 +1,5 @@
-// @flow
-import type { JoyConfig } from '../server/config'
-import path from 'path'
+import { JoyConfig } from '../server/config'
+import  * as path from 'path'
 import webpack from 'webpack'
 import resolve from 'resolve'
 import CaseSensitivePathPlugin from 'case-sensitive-paths-webpack-plugin'
@@ -109,12 +108,12 @@ function optimizationConfig ({ dir, dev, isServer, totalPages }) {
   return config
 }
 
-type BaseConfigContext = {|
+type BaseConfigContext = {
   dev: boolean,
   isServer: boolean,
   buildId: string,
   config: JoyConfig
-|}
+}
 
 export default async function getBaseWebpackConfig (dir: string, { dev = false, isServer = false, buildId, config }: BaseConfigContext) {
   const defaultLoaders = {

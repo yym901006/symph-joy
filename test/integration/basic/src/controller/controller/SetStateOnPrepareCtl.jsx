@@ -1,5 +1,5 @@
 import React from 'react'
-import { controller, requireModel } from '../../../../../../controller'
+import { controller, requireModel } from '@symph/joy/controller'
 
 @controller((store, ownProps) => {
   return {

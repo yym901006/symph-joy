@@ -1,8 +1,8 @@
 const notifier = require('node-notifier')
-const childProcess = require('child_process')
-const rimraf = require('rimraf')
-const mkdirp = require('mkdirp')
-const isWindows = /^win/.test(process.platform)
+// const childProcess = require('child_process')
+// const rimraf = require('rimraf')
+// const mkdirp = require('mkdirp')
+// const isWindows = /^win/.test(process.platform)
 
 export async function compile (task) {
   await task.parallel(['bin', 'server', 'joybuild', 'joybuildstatic', 'lib', 'client'])
@@ -39,22 +39,12 @@ export async function joybuildstatic (task, opts) {
   notify('Compiled export files')
 }
 
-// Create node_modules/@symph/joy for the use of test apps
-export async function symlinkJoyForTesting () {
-  rimraf.sync('test/node_modules/@symph')
-  mkdirp.sync('test/node_modules')
-  mkdirp.sync('test/node_modules/@symph')
-
-  const symlinkCommand = isWindows ? 'mklink /D "joy" "..\\..\\..\\"' : 'ln -s ../../../ joy'
-  childProcess.execSync(symlinkCommand, { cwd: 'test/node_modules/@symph' })
-}
-
 export async function copy (task) {
   await task.source('pages/**/*.js').target('dist/pages')
 }
 
 export async function build (task) {
-  await task.serial(['symlinkJoyForTesting', 'copy', 'compile'])
+  await task.serial(['copy', 'compile'])
 }
 
 export default async function (task) {

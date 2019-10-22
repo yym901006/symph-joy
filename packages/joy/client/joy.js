@@ -1,4 +1,4 @@
-import initJoy, * as joy from './'
+import initJoy, * as joy from './index'
 
 window.joy = joy
 

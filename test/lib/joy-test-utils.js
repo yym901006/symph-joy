@@ -65,10 +65,31 @@ export function findPort () {
 }
 
 export function runJoyCommand (argv, options = {}) {
-  const cwd = path.dirname(require.resolve('@symph/joy/package'))
+  const nextDir = path.dirname(require.resolve('@symph/joy/package'))
+  const nextBin = path.join(nextDir, 'dist/bin/joy')
+  const cwd = options.cwd || nextDir
+  // Let Next.js decide the environment
+  const env = { ...process.env, ...options.env, NODE_ENV: '' }
+
   return new Promise((resolve, reject) => {
     console.log(`Running command "joy ${argv.join(' ')}"`)
-    const instance = spawn('node', ['dist/bin/joy', ...argv], { cwd, stdio: options.stdout ? ['ignore', 'pipe', 'ignore'] : 'inherit' })
+    const instance = spawn('node', [nextBin, ...argv], {
+      ...options.spawnOptions,
+      cwd,
+      env,
+      stdio: ['ignore', 'pipe', 'pipe']
+    })
+
+    if (typeof options.instance === 'function') {
+      options.instance(instance)
+    }
+
+    let stderrOutput = ''
+    if (options.stderr) {
+      instance.stderr.on('data', function (chunk) {
+        stderrOutput += chunk
+      })
+    }
 
     let stdoutOutput = ''
     if (options.stdout) {
@@ -79,32 +100,50 @@ export function runJoyCommand (argv, options = {}) {
 
     instance.on('close', () => {
       resolve({
-        stdout: stdoutOutput
+        stdout: stdoutOutput,
+        stderr: stderrOutput
       })
     })
 
-    instance.on('error', (err) => {
+    instance.on('error', err => {
+      err.stdout = stdoutOutput
+      err.stderr = stderrOutput
       reject(err)
     })
   })
 }
 
-export function runJoyCommandDev (argv, stdOut) {
+export function runJoyCommandDev (argv, stdOut, opts = {}) {
   const cwd = path.dirname(require.resolve('@symph/joy/package'))
-  console.log(`Running command "joy ${argv.join(' ')}"`)
+  const env = {
+    ...process.env,
+    NODE_ENV: undefined,
+    __JOY_TEST_MODE: 'true',
+    ...opts.env
+  }
+
   return new Promise((resolve, reject) => {
-    const instance = spawn('node', ['dist/bin/joy', ...argv], { cwd })
+    console.log(`Running command "joy ${argv.join(' ')}"`)
+    console.log(`Running command "joy cwd ${require.resolve('@symph/joy/package')}"`)
+    const instance = spawn('node', ['dist/bin/joy', ...argv], { cwd, env })
 
     function handleStdout (data) {
       const message = data.toString()
-      if (/> Ready on/.test(message)) {
+      if (/ready on/i.test(message)) {
         resolve(stdOut ? message : instance)
+      }
+      if (typeof opts.onStdout === 'function') {
+        opts.onStdout(message)
       }
       process.stdout.write(message)
     }
 
     function handleStderr (data) {
-      process.stderr.write(data.toString())
+      const message = data.toString()
+      if (typeof opts.onStderr === 'function') {
+        opts.onStderr(message)
+      }
+      process.stderr.write(message)
     }
 
     instance.stdout.on('data', handleStdout)
@@ -115,7 +154,7 @@ export function runJoyCommandDev (argv, stdOut) {
       instance.stderr.removeListener('data', handleStderr)
     })
 
-    instance.on('error', (err) => {
+    instance.on('error', err => {
       reject(err)
     })
   })

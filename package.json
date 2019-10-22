@@ -1,157 +1,74 @@
 {
-  "name": "@symph/joy",
-  "version": "1.2.6",
-  "description": "Minimalistic framework for React SPA applications, inspiration comes from Next.js and Dva",
-  "keywords": [
-    "react",
-    "redux",
-    "ssr",
-    "mvc",
-    "mvvm"
+  "name": "symph-projects",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "main": "./dist/server/joy.js",
+  "description": "React SPA applications, inspiration comes from Next.js and Dva",
   "license": "MIT",
   "repository": "https://github.com/lnlfps/symph-joy",
   "bugs": "",
   "homepage": "https://lnlfps.github.io/symph-joy",
-  "files": [
-    "dist",
-    "app.js",
-    "asset.js",
-    "autowire.js",
-    "babel.js",
-    "client.js",
-    "config.js",
-    "constants.js",
-    "controller.js",
-    "document.js",
-    "dynamic.js",
-    "error.js",
-    "fetch.js",
-    "head.js",
-    "hook.js",
-    "model.js",
-    "prefetch.js",
-    "proxy-api-middleware.js",
-    "proxy-middleware.js",
-    "router.js"
-  ],
-  "bin": {
-    "joy": "./dist/bin/joy"
-  },
   "scripts": {
-    "build": "taskr",
-    "release": "taskr release",
-    "pretestonly": "taskr pretest",
-    "testonly": "cross-env NODE_PATH=test/lib jest \\.test.js",
-    "posttestonly": "taskr posttest",
-    "testall": "npm run testonly -- --forceExit --reporters=default --reporters=jest-junit --config='./jest.config.js'",
-    "pretest": "npm run lint",
-    "test": "npm run testall",
-    "coveralls": "nyc --instrument=false --source-map=false report --temp-directory=./coverage --reporter=text-lcov | coveralls",
-    "flow": "flow check",
-    "lint": "standard 'bin/*' 'client/**/*.js' 'examples/**/*.js' 'lib/**/*.js' 'pages/**/*.js' 'server/**/*.js' 'build/**/*.js' 'test/**/*.js'",
-    "prepublish": "npm run release",
-    "precommit": "lint-staged"
+    "lerna": "lerna",
+    "dev": "lerna run build --stream --parallel",
+    "testonly": "jest",
+    "testall": "yarn run testonly -- --ci --reporters=default --reporters=jest-junit --forceExit --runInBand",
+    "pretest": "yarn run lint",
+    "test": "yarn run testall",
+    "lint": "lerna run typescript && standard && standard --parser typescript-eslint-parser --plugin typescript \"packages/**/*.ts\"",
+    "lint-fix": "standard --fix && standard --fix --parser typescript-eslint-parser --plugin typescript \"packages/**/*.ts\"",
+    "prettier": "prettier --write",
+    "prettier-fix": "prettier --write \"**/*.{js,jsx,json,ts,tsx,md,mdx,css,html,yml,yaml,scss,sass}\" && npm lint-fix",
+    "types": "lerna run types --stream",
+    "typescript": "lerna run typescript",
+    "prepublish": "lerna run prepublish",
+    "publish-canary": "lerna version prerelease --preid canary --force-publish && release --pre",
+    "publish-stable": "lerna version --force-publish",
+    "lint-staged": "lint-staged",
+    "joy": "./packages/joy/dist/bin/joy"
   },
-  "taskr": {
-    "requires": [
-      "./taskfile-babel.js"
+  "pre-commit": "lint-staged",
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "standard --fix",
+      "git add"
+    ],
+    "*.tsx": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.ts": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.md": [
+      "prettier --write",
+      "git add"
     ]
   },
   "standard": {
     "parser": "babel-eslint",
     "ignore": [
+      "packages/**/*.ts",
+      "**/*.d.ts",
       "**/node_modules/**",
-      "**/examples/**",
+      "examples/**",
       "**/test/**",
       "**/.joy/**",
       "**/out/**"
+    ],
+    "globals": [
+      "performance"
     ]
   },
-  "lint-staged": {
-    "*.js": "standard",
-    "bin/*": "standard"
-  },
-  "dependencies": {
-    "@babel/core": "7.6.0",
-    "@babel/plugin-proposal-class-properties": "7.5.5",
-    "@babel/plugin-proposal-decorators": "7.6.0",
-    "@babel/plugin-proposal-object-rest-spread": "7.5.5",
-    "@babel/plugin-syntax-dynamic-import": "7.2.0",
-    "@babel/plugin-transform-react-jsx-source": "7.5.0",
-    "@babel/plugin-transform-runtime": "7.6.0",
-    "@babel/preset-env": "7.6.0",
-    "@babel/preset-react": "7.0.0",
-    "@babel/preset-typescript": "7.6.0",
-    "@babel/runtime": "7.6.0",
-    "@babel/runtime-corejs2": "7.6.0",
-    "@babel/template": "7.6.0",
-    "@symph/tempo": "1.2.4",
-    "ansi-html": "0.0.7",
-    "babel-core": "7.0.0-bridge.0",
-    "babel-loader": "8.0.6",
-    "babel-plugin-react-require": "3.1.1",
-    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
-    "case-sensitive-paths-webpack-plugin": "2.2.0",
-    "compression": "1.7.4",
-    "connected-react-router": "6.5.2",
-    "cross-spawn": "7.0.0",
-    "del": "5.1.0",
-    "etag": "1.8.1",
-    "event-source-polyfill": "1.0.8",
-    "find-up": "4.1.0",
-    "flatten": "1.0.2",
-    "fresh": "0.5.2",
-    "friendly-errors-webpack-plugin": "1.7.0",
-    "glob": "7.1.4",
-    "global": "4.4.0",
-    "hard-source-webpack-plugin": "0.13.1",
-    "hoist-non-react-statics": "3.3.0",
-    "htmlescape": "1.1.1",
-    "http-errors": "1.7.3",
-    "http-proxy": "1.17.0",
-    "http-status": "1.3.2",
-    "invariant": "2.2.4",
-    "is-plain-object": "3.0.0",
-    "isomorphic-fetch": "2.2.1",
-    "json-loader": "0.5.7",
-    "loader-utils": "1.2.3",
-    "minimist": "1.2.0",
-    "mkdirp-then": "1.2.0",
-    "nanoid": "2.1.1",
-    "node-http-proxy-json": "0.1.6",
-    "path-to-regexp": "3.1.0",
-    "prop-types": "15.7.2",
-    "prop-types-exact": "1.2.0",
-    "react-error-overlay": "6.0.1",
-    "react-hot-loader": "4.12.13",
-    "react-lifecycles-compat": "3.0.4",
-    "react-loadable": "5.5.0",
-    "react-redux": "7.1.1",
-    "react-router-dom": "5.0.1",
-    "recursive-copy": "2.0.10",
-    "redux": "4.0.4",
-    "redux-saga": "1.1.1",
-    "resolve": "1.12.0",
-    "send": "0.17.1",
-    "source-map": "0.7.3",
-    "stream-buffers": "3.0.2",
-    "strip-ansi": "5.2.0",
-    "styled-jsx": "3.2.2",
-    "terser-webpack-plugin": "2.1.0",
-    "unfetch": "4.1.0",
-    "url": "0.11.0",
-    "uuid": "3.3.3",
-    "warning": "4.0.3",
-    "webpack": "4.40.2",
-    "webpack-dev-middleware": "3.7.1",
-    "webpack-hot-middleware": "2.25.0",
-    "webpack-sources": "1.4.3",
-    "webpackbar": "4.0.0",
-    "write-file-webpack-plugin": "4.5.1"
-  },
   "devDependencies": {
+    "lerna": "3.18.1",
+    "prettier": "1.18.2",
+    "react": "16.10.2",
+    "react-dom": "16.10.2",
+    "typescript": "3.6.4",
     "@babel/preset-flow": "7.0.0-beta.43",
     "@taskr/babel": "1.1.0-next.1",
     "@taskr/clear": "1.1.0",
@@ -185,9 +102,5 @@
     "standard": "14.3.0",
     "taskr": "1.1.0",
     "wait-port": "0.2.2"
-  },
-  "peerDependencies": {
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0"
   }
 }
