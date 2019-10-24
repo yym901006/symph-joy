@@ -1,7 +1,8 @@
 import { join } from 'path'
-import promisify from '../../../lib/promisify'
+import { promisify } from 'util'
 import fs from 'fs'
 import { IS_BUNDLED_PAGE_REGEX } from '../../../lib/constants'
+import * as webpack from 'webpack'
 
 const unlink = promisify(fs.unlink)
 
@@ -11,7 +12,7 @@ export default class UnlinkFilePlugin {
     this.prevAssets = {}
   }
 
-  apply (compiler: any) {
+  apply (compiler: webpack.Compiler) {
     compiler.hooks.afterEmit.tapAsync('JoyUnlinkRemovedPages', (compilation, callback) => {
       const removed = Object.keys(this.prevAssets)
         .filter((a) => IS_BUNDLED_PAGE_REGEX.test(a) && !compilation.assets[a])

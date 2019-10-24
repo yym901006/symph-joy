@@ -1,6 +1,6 @@
 import { JoyConfig } from '../server/config'
 import  * as path from 'path'
-import webpack from 'webpack'
+import webpack, { RuleSetRule } from 'webpack'
 import resolve from 'resolve'
 import CaseSensitivePathPlugin from 'case-sensitive-paths-webpack-plugin'
 import WriteFilePlugin from 'write-file-webpack-plugin'
@@ -33,16 +33,16 @@ import ClientGlobalComponentPlugin from './webpack/plugins/client-global-compone
 // The externals config makes sure that
 // on the server side when modules are
 // in node_modules they don't get compiled by webpack
-function externalsConfig (dir, isServer) {
-  const externals = []
+function externalsConfig (dir: string, isServer: boolean) {
+  const externals: Array<any> = []
 
   if (!isServer) {
     return externals
   }
 
-  externals.push((context, request, callback) => {
+  externals.push((context: any, request: any, callback: any) => {
     resolve(request, { basedir: dir, preserveSymlinks: true }, (err, res) => {
-      if (err) {
+      if (err || !res) {
         return callback()
       }
 
@@ -67,7 +67,7 @@ function externalsConfig (dir, isServer) {
   return externals
 }
 
-function optimizationConfig ({ dir, dev, isServer, totalPages }) {
+function optimizationConfig ({ dir, dev, isServer, totalPages }: {dir: string, dev:boolean, isServer: boolean, totalPages: number}) {
   if (isServer) {
     return {
       splitChunks: false,
@@ -130,7 +130,7 @@ export default async function getBaseWebpackConfig (dir: string, { dev = false, 
         ],
         // All pages are javascript files. So we apply hot-self-accept-loader here to facilitate hot reloading of pages.
         // This makes sure plugins just have to implement `pageExtensions` instead of also implementing the loader
-        extensions: new RegExp(`\\.+(${config.pageExtensions.join('|')})$`)
+        extensions: new RegExp(`\\.+(${(config.pageExtensions || []).join('|')})$`)
       }
     }
   }
@@ -140,11 +140,11 @@ export default async function getBaseWebpackConfig (dir: string, { dev = false, 
     .split(process.platform === 'win32' ? ';' : ':')
     .filter((p) => !!p)
 
-  const distDir = path.join(dir, config.distDir)
+  const distDir = path.join(dir, config.distDir || '')
   const outputPath = path.join(distDir, isServer ? SERVER_DIRECTORY : '')
   // const pagesEntries = await getPages(dir, {joyPagesDir: DEFAULT_PAGES_DIR, dev, buildId, isServer, pageExtensions: config.pageExtensions.join('|')})
   const totalPages = 1
-  const appEntryFilePath = path.join(dir, config.main)
+  const appEntryFilePath = path.join(dir, config.main || '')
   const errorCompFilePath = getErrorCompFilePath({ dir, joyPagesDir: DEFAULT_PAGES_DIR })
   const documentCompFilePath = getDocumentCompFilePath({ dir, joyPagesDir: DEFAULT_PAGES_DIR })
   const entries = !isServer ? {
@@ -173,9 +173,10 @@ export default async function getBaseWebpackConfig (dir: string, { dev = false, 
     }
   }
 
-  const webpackMode = dev ? 'development' : 'production'
+  const webpackMode:  "development" | "production" | "none" = dev ? 'development' : 'production'
 
-  let webpackConfig = {
+
+  let webpackConfig: webpack.Configuration = {
     mode: webpackMode,
     devtool: dev ? 'cheap-module-source-map' : false,
     name: isServer ? 'server' : 'client',
@@ -205,6 +206,7 @@ export default async function getBaseWebpackConfig (dir: string, { dev = false, 
       hotUpdateMainFilename: 'static/webpack/[hash].hot-update.json',
       // This saves chunks with the name given via `import()`
       chunkFilename: isServer ? `${dev ? '[name]' : '[name].[contenthash]'}.js` : `static/chunks/${dev ? '[name]' : '[name].[contenthash]'}.js`,
+      // @ts-ignore
       strictModuleExceptionHandling: true
     },
     performance: { hints: false },
@@ -230,7 +232,7 @@ export default async function getBaseWebpackConfig (dir: string, { dev = false, 
           exclude: /node_modules/,
           use: defaultLoaders.babel
         }
-      ].filter(Boolean)
+      ].filter(Boolean) as RuleSetRule[]
     },
     plugins: [
       dev && !isServer && new HardSourceWebpackPlugin({}),

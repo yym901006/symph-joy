@@ -80,7 +80,7 @@ import fs from 'fs'
 //   return entries
 // }
 
-export function getErrorCompFilePath ({ dir, joyPagesDir }) {
+export function getErrorCompFilePath ({ dir, joyPagesDir }: {dir: string, joyPagesDir: string}): string {
   let filePath = null
   if (fs.existsSync(path.join(dir, 'src/_error.js'))) {
     filePath = path.join(dir, 'src/_error.js')
@@ -93,7 +93,7 @@ export function getErrorCompFilePath ({ dir, joyPagesDir }) {
   return filePath
 }
 
-export function getDocumentCompFilePath ({ dir, joyPagesDir }) {
+export function getDocumentCompFilePath ({ dir, joyPagesDir }: {dir: string, joyPagesDir: string}): string {
   let filePath = null
   if (fs.existsSync(path.join(dir, 'src/_document.js'))) {
     filePath = path.join(dir, 'src/_document.js')

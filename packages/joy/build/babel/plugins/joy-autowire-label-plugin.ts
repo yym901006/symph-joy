@@ -1,15 +1,16 @@
 import { PluginObj } from '@babel/core'
 import { NodePath } from '@babel/traverse'
 import * as BabelTypes from '@babel/types'
+import { ImportDeclaration } from 'babel-types'
 
-export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingding = false }): PluginObj {
+export default function ({ types: t }: { types: any }, { autoBinding = false }): PluginObj {
   return {
     pre: (file) => {
       let importAutowire
       let decorAutowire
       const identifyAutowire = t.identifier('autowire')
       file.path.traverse({
-        ImportDeclaration (importPath) {
+        'ImportDeclaration': (importPath: NodePath<ImportDeclaration>) => {
           if (importPath.node.source.value === '@symph/joy/autowire' || importPath.node.source.value === '@symph/tempo/autowire') {
             importAutowire = importPath
             decorAutowire = importPath.get('specifiers').find(item =>
@@ -83,6 +84,7 @@ export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingd
           })
         }
       })
-    }
+    },
+    visitor: {}
   }
 }

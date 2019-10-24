@@ -35,6 +35,7 @@ if (!existsSync(dir)) {
 }
 
 build(dir)
+  .then(() => process.exit(0))
   .catch((err) => {
     printAndExit(err)
   })

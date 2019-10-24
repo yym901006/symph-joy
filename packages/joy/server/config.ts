@@ -1,22 +1,24 @@
 import findUp from 'find-up'
 import { CONFIG_FILE } from '../lib/constants'
+import webpack from 'webpack'
+import webpackDevMiddleware from 'webpack-dev-middleware'
 
-type WebpackConfig = *
-
-type WebpackDevMiddlewareConfig = *
-
-export type JoyConfig = {|
-  webpack: null | (webpackConfig: WebpackConfig, {dir: string, dev: boolean, isServer: boolean, buildId: string, config: JoyConfig, defaultLoaders: {}, totalPages: number}) => WebpackConfig,
-  webpackDevMiddleware: null | (WebpackDevMiddlewareConfig: WebpackDevMiddlewareConfig) => WebpackDevMiddlewareConfig,
-  poweredByHeader: boolean,
-  distDir: string,
-  assetPrefix: string,
-  configOrigin: string,
-  useFileSystemPublicRoutes: boolean,
-  generateBuildId: () => string,
-  generateEtags: boolean,
-  pageExtensions: Array<string>
-|}
+export type JoyConfig = {
+  main?: string,
+  serverRender?: boolean,
+  webpack?: null | ((webpackConfig: webpack.Configuration, {dir, dev, isServer: boolean, buildId, config, defaultLoaders: {}, totalPages}: {dir: string, dev: boolean, isServer: boolean, buildId:string, config: JoyConfig, defaultLoaders: {}, totalPages: number}) => webpack.Configuration) ,
+  webpackDevMiddleware?:  null | ((webpackDevMiddlewareConfig: any) => any),
+  poweredByHeader?: boolean,
+  distDir?: string,
+  assetPrefix?: string,
+  configOrigin?: string,
+  useFileSystemPublicRoutes?: boolean,
+  generateBuildId?: () => string,
+  generateEtags?: boolean,
+  pageExtensions?: Array<string>,
+  exportPathMap?: () => any,
+  plugins?: Array<any>
+}
 
 const defaultConfig: JoyConfig = {
   main: 'src/index.js',
@@ -39,7 +41,7 @@ const defaultConfig: JoyConfig = {
     return {
       '/': { page: '/' }
     }
-  }
+  },
 }
 
 type PhaseFunction = (phase: string, options: {defaultConfig: JoyConfig}) => JoyConfig
@@ -49,7 +51,7 @@ export default function loadConfig (phase: string, dir: string, customConfig?: J
     customConfig.configOrigin = 'server'
     return preparePlugins({ ...defaultConfig, ...customConfig })
   }
-  const path: string = findUp.sync(CONFIG_FILE, {
+  const path = findUp.sync(CONFIG_FILE, {
     cwd: dir
   })
 
@@ -68,7 +70,7 @@ export default function loadConfig (phase: string, dir: string, customConfig?: J
   return defaultConfig
 }
 
-function preparePlugins (config) {
+function preparePlugins (config: JoyConfig) {
   if (!config.plugins) {
     return config
   }

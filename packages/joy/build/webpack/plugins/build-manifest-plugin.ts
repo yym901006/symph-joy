@@ -1,21 +1,22 @@
 // @flow
 import { RawSource } from 'webpack-sources'
 import { BUILD_MANIFEST, ROUTE_NAME_REGEX, IS_BUNDLED_PAGE_REGEX, CLIENT_STATIC_FILES_RUNTIME_MAIN } from '../../../lib/constants'
+import * as webpack from 'webpack'
 
 // This plugin creates a build-manifest.json for all assets that are being output
 // It has a mapping of "entry" filename to real filename. Because the real filename can be hashed in production
 export default class BuildManifestPlugin {
-  apply (compiler: any) {
+  apply (compiler: webpack.Compiler) {
     compiler.hooks.emit.tapAsync('JoyBuildManifest', (compilation, callback) => {
       const { chunks } = compilation
-      const assetMap = { files: [], devFiles: [], pages: {} }
+      const assetMap : {files: Array<any>, devFiles: Array<any>, pages: any} = { files: [], devFiles: [], pages: {} }
 
       const mainJsChunk = chunks.find((c) => c.name === CLIENT_STATIC_FILES_RUNTIME_MAIN)
-      const mainJsFiles = mainJsChunk && mainJsChunk.files.length > 0 ? mainJsChunk.files.filter((file) => /\.js$/.test(file)) : []
+      const mainJsFiles = mainJsChunk && mainJsChunk.files.length > 0 ? mainJsChunk.files.filter((file:string) => /\.js$/.test(file)) : []
       assetMap.files.push(...mainJsFiles)
 
       const commonsChunk = chunks.find((c) => c.name === 'commons')
-      const cmmmonsJsFiles = commonsChunk && commonsChunk.files.length > 0 ? commonsChunk.files.filter((file) => /\.js$/.test(file)) : []
+      const cmmmonsJsFiles = commonsChunk && commonsChunk.files.length > 0 ? commonsChunk.files.filter((file: string) => /\.js$/.test(file)) : []
       assetMap.files.push(...cmmmonsJsFiles)
 
       for (const filePath of Object.keys(compilation.assets)) {

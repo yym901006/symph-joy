@@ -1,19 +1,23 @@
 // This plugin mirrors webpack 3 `filename` and `chunkfilename` behavior
 // This fixes https://github.com/webpack/webpack/issues/6598
 // This plugin is based on https://github.com/researchgate/webpack/commit/2f28947fa0c63ccbb18f39c0098bd791a2c37090
+import * as webpack from 'webpack'
+
 export default class ChunkNamesPlugin {
-  constructor ({ dev }) {
+  dev: boolean
+  constructor ({ dev }: {dev: boolean}) {
     this.dev = dev
   }
 
-  apply (compiler) {
+  apply (compiler: webpack.Compiler) {
     const me = this
     compiler.hooks.compilation.tap('JoyChunkNamesPlugin', (compilation) => {
+      // @ts-ignore
       compilation.chunkTemplate.hooks.renderManifest.intercept({
-        register (tapInfo) {
+        register (tapInfo: any) {
           if (tapInfo.name === 'JavascriptModulesPlugin') {
             const originalMethod = tapInfo.fn
-            tapInfo.fn = function (result, options) {
+            tapInfo.fn = function (result: any, options: any) {
               let filenameTemplate
               const chunk = options.chunk
               const outputOptions = options.outputOptions
@@ -42,7 +46,7 @@ export default class ChunkNamesPlugin {
   }
 }
 
-function tryGetChunkEntryFileName (chunk) {
+function tryGetChunkEntryFileName (chunk: webpack.compilation.Chunk) {
   const modules = chunk.getModules()
   // 找到入口module，depth越大，表示引入的深度越深。
   const topLevel = modules.reduce((rst, module) => {

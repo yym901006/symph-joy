@@ -53,7 +53,7 @@ try {
       // update file's data
       file.data = Buffer.from(
         result.outputText.replace(
-          /process\.env\.__NEXT_VERSION/g,
+          /process\.env\.__JOY_VERSION/g,
           `"${require('./package.json').version}"`
         ),
         'utf8'

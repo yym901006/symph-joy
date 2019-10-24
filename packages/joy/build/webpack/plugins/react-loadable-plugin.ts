@@ -24,14 +24,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 import url from 'url'
 import filePath from 'path'
 import crypto from 'crypto'
+import * as webpack from 'webpack'
 const dev = process.env.NODE_ENV === 'development'
 
-function buildManifest (compiler, compilation) {
+function buildManifest (compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
   const context = compiler.options.context
-  const manifest = {}
+  const manifest:{[key: string]: Array<webpack.compilation.Module>} = {}
 
   compilation.chunks.forEach(chunk => {
-    chunk.files.forEach(file => {
+    chunk.files.forEach((file: string) => {
       for (const module of chunk.modulesIterable) {
         const id = module.id
         const name = typeof module.libIdent === 'function' ? module.libIdent({ context }) : null
@@ -60,6 +61,7 @@ function buildManifest (compiler, compilation) {
         if (!dev) {
           moduleId = crypto.createHash('md5').update(moduleId).digest('hex')
         }
+
         if (!manifest[moduleId]) {
           manifest[moduleId] = []
         }
@@ -72,14 +74,15 @@ function buildManifest (compiler, compilation) {
 }
 
 export class ReactLoadablePlugin {
-  constructor (opts = {}) {
-    this.filename = opts.filename
+  filename: string
+  constructor ( {filename}: {filename: string}) {
+    this.filename = filename
   }
 
-  apply (compiler) {
+  apply (compiler: webpack.Compiler) {
     compiler.hooks.emit.tapAsync('ReactLoadableManifest', (compilation, callback) => {
       const manifest = buildManifest(compiler, compilation)
-      var json = JSON.stringify(manifest, null, 2)
+      let json = JSON.stringify(manifest, null, 2)
       compilation.assets[this.filename] = {
         source () {
           return json

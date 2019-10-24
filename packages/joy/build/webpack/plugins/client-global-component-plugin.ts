@@ -4,9 +4,12 @@
  *
  */
 import { ConcatSource } from 'webpack-sources'
+import * as webpack from 'webpack'
 
 export default class ClientGlobalComponentPlugin {
-  constructor ({ sourceFilePath, globalName }) {
+  sourceFilePath: string
+  globalName: string
+  constructor ({ sourceFilePath, globalName }: {sourceFilePath: string, globalName: string}) {
     if (sourceFilePath === undefined || sourceFilePath === null || sourceFilePath.length === 0) {
       throw new Error('ClientGlobalComponentPlugin init error,  sourceFilePath is empty')
     }
@@ -15,9 +18,9 @@ export default class ClientGlobalComponentPlugin {
     console.log(`> ${this.globalName} source path is ${this.sourceFilePath}`)
   }
 
-  apply (compiler) {
-    compiler.hooks.compilation.tap('AppMainEntryPlugin', (compilation) => {
-      compilation.moduleTemplate.hooks.render.tap('AppMainEntryPluginRegister', (moduleSource, module) => {
+  apply (compiler: webpack.Compiler) {
+    compiler.hooks.compilation.tap('AppMainEntryPlugin', (compilation: any) => {
+      compilation.moduleTemplate.hooks.render.tap('AppMainEntryPluginRegister', (moduleSource: any, module: any) => {
         if (!module.resource && module.rootModule) {
           module = module.rootModule
         }

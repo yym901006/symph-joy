@@ -1,17 +1,19 @@
 // @flow
 
+import webpack from 'webpack'
+
 function deleteCache (path: string) {
   delete require.cache[path]
 }
 
 // This plugin flushes require.cache after emitting the files. Providing 'hot reloading' of server files.
 export default class ChunkNamesPlugin {
-  prevAssets: null | {[string]: {existsAt: string}}
+  prevAssets: null | {[key:string]: {existsAt: string}}
   constructor () {
     this.prevAssets = null
   }
 
-  apply (compiler: any) {
+  apply (compiler: webpack.Compiler) {
     compiler.hooks.afterEmit.tapAsync('JoyRequireCacheHotReloader', (compilation, callback) => {
       const { assets } = compilation
 

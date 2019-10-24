@@ -7,13 +7,13 @@ import {
 
 export default class PagesPlugin {
   apply (compiler: any) {
-    compiler.hooks.compilation.tap('PagesPlugin', (compilation) => {
-      compilation.chunkTemplate.hooks.render.tap('PagesPluginRenderPageRegister', (modules, chunk) => {
+    compiler.hooks.compilation.tap('PagesPlugin', (compilation: any) => {
+      compilation.chunkTemplate.hooks.render.tap('PagesPluginRenderPageRegister', (modules: any, chunk: any) => {
         if (!IS_BUNDLED_PAGE_REGEX.test(chunk.name)) {
           return modules
         }
-
-        let routeName = ROUTE_NAME_REGEX.exec(chunk.name)[1]
+        const matched = ROUTE_NAME_REGEX.exec(chunk.name)
+        let routeName = matched && matched[1] || ''
 
         // We need to convert \ into / when we are in windows
         // to get the proper route name
