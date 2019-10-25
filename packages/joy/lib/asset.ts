@@ -1,6 +1,6 @@
-let assetPrefix
+let assetPrefix: string
 
-export default function asset (path) {
+export default function asset (path: string) {
   // If the URL starts with http, we assume it's an
   if (/^https?:\/\//.test(path)) {
     return path
@@ -10,6 +10,6 @@ export default function asset (path) {
   return `${assetPrefix || ''}/static/${pathWithoutSlash}`
 }
 
-export function setAssetPrefix (url) {
+export function setAssetPrefix (url: string) {
   assetPrefix = url
 }

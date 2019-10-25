@@ -1,1 +1,1 @@
-module.exports = require('./dist/lib/controller')
+module.exports = require('./dist/components/controller')

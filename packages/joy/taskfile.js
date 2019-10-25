@@ -54,12 +54,12 @@ const babelServerOpts = {
 
 export async function compile (task) {
   await task.parallel([
-    'cli',
     'bin',
     'server',
     'joybuild',
     'joybuildstatic',
     'pages',
+    'components',
     'lib',
     'client',
   ])
@@ -134,6 +134,13 @@ export async function pages (task, opts) {
     .target('dist/pages')
 }
 
+export async function components (task, opts) {
+  await task
+    .source(opts.src || 'components/**/*.+(js|jsx|ts|tsx)')
+    .babel(babelClientOpts)
+    .target('dist/components')
+}
+
 export async function telemetry (task, opts) {
   await task
     .source(opts.src || 'telemetry/**/*.+(js|ts|tsx)')
@@ -151,6 +158,7 @@ export default async function (task) {
   await task.start('build')
   await task.watch('bin/*', 'bin')
   await task.watch('pages/**/*.+(js|ts|tsx)', 'pages')
+  await task.watch('components/**/*.+(js|ts|tsx)', 'components')
   await task.watch('server/**/*.+(js|ts|tsx)', 'server')
   await task.watch('build/**/*.+(js|ts|tsx)', 'joybuild')
   await task.watch('export/**/*.+(js|ts|tsx)', 'joybuildstatic')

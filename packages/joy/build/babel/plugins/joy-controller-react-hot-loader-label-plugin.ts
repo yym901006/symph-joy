@@ -3,7 +3,7 @@ import template from '@babel/template'
 import { NodePath } from '@babel/traverse'
 import * as BabelTypes from '@babel/types'
 
-const requireRHL = template(
+const requireRHL: any = template(
   'require(\'react-hot-loader/root\').hot'
 )()
 
@@ -11,12 +11,12 @@ export default function ({ types: t }: { types: typeof BabelTypes }): PluginObj 
   return {
     pre: (file) => {
       let importController
-      let controller
+      let controller: any
       file.path.traverse({
-        ImportDeclaration (importPath) {
+        ImportDeclaration (importPath: any) {
           if (importPath.node.source.value === '@symph/joy/controller') {
             importController = importPath
-            controller = importPath.get('specifiers').find(item => item.get('type').node === 'ImportDefaultSpecifier' || item.get('imported.name').node === 'controller')
+            controller = importPath.get('specifiers').find((item: any) => item.get('type').node === 'ImportDefaultSpecifier' || item.get('imported.name').node === 'controller')
           }
         }
       })
@@ -24,13 +24,13 @@ export default function ({ types: t }: { types: typeof BabelTypes }): PluginObj 
 
       // add 'hotLoader' to @controller(mapStateToProps, {hotLoader}), if not exist
       file.path.traverse({
-        ClassDeclaration (clazz: NodePath<BabelTypes.ClassDeclaration>) {
+        ClassDeclaration (clazz: any) {
           if (!clazz.node.decorators || clazz.node.decorators.length === 0) {
             return
           }
 
-          let decoController
-          clazz.get('decorators').forEach((path, i) => {
+          let decoController: any
+          clazz.get('decorators').forEach((path: any, i: number) => {
             if (path.node.expression.callee && path.node.expression.callee.name === controller.node.local.name) {
               decoController = path
             }
@@ -52,13 +52,14 @@ export default function ({ types: t }: { types: typeof BabelTypes }): PluginObj 
             arg1 = decoController.get('expression.arguments.1')
           }
 
-          const optHotLoader = arg1.get('properties').find(item => item.node.key.name === 'hotLoader')
+          const optHotLoader = arg1.get('properties').find((item: any) => item.node.key.name === 'hotLoader')
           if (!optHotLoader) {
             arg1.node.properties.push(t.objectProperty(t.identifier('hotLoader'), requireRHL.expression))
             // optHotLoader = arg1.get('properties').find(item => item.node.key.name === 'hotLoader')
           }
         }
       })
-    }
+    },
+    visitor: {}
   }
 }

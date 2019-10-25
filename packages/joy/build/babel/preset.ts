@@ -1,34 +1,56 @@
+import { PluginItem } from '@babel/core'
 const env = process.env.NODE_ENV
 const isProduction = env === 'production'
 const isDevelopment = env === 'development'
 const isTest = env === 'test'
 
+type StyledJsxPlugin = [string, any] | string
+type StyledJsxBabelOptions = {
+  plugins?: StyledJsxPlugin[]
+  'babel-test'?: boolean
+} | undefined
+
 // Resolve styled-jsx plugins
-function styledJsxOptions (opts) {
-  if (!opts) {
+function styledJsxOptions(options: StyledJsxBabelOptions) {
+  if (!options) {
     return {}
   }
 
-  if (!Array.isArray(opts.plugins)) {
-    return opts
+  if (!Array.isArray(options.plugins)) {
+    return options
   }
 
-  opts.plugins = opts.plugins.map(plugin => {
-    if (Array.isArray(plugin)) {
-      const [name, options] = plugin
-      return [
-        require.resolve(name),
-        options
-      ]
+  options.plugins = options.plugins.map(
+    (plugin: StyledJsxPlugin): StyledJsxPlugin => {
+      if (Array.isArray(plugin)) {
+        const [name, options] = plugin
+        return [require.resolve(name), options]
+      }
+
+      return require.resolve(plugin)
     }
+  )
 
-    return require.resolve(plugin)
-  })
-
-  return opts
+  return options
 }
 
-module.exports = (context, opts = {}) => ({
+type JoyBabelPresetOptions = {
+  'preset-env'?: any
+  'preset-react'?: any
+  'class-properties'?: any
+  'transform-runtime'?: any
+  'experimental-modern-preset'?: PluginItem
+  'styled-jsx'?: StyledJsxBabelOptions
+}
+
+type BabelPreset = {
+  presets?: PluginItem[] | null
+  plugins?: PluginItem[] | null
+  sourceType?: 'script' | 'module' | 'unambiguous'
+  overrides?: any[]
+}
+
+module.exports = (context: any, opts: JoyBabelPresetOptions = {}) => ({
   presets: [
     [require('@babel/preset-env').default, {
       // In the test environment `modules` is often needed to be set to true, babel figures that out by itself using the `'auto'` option

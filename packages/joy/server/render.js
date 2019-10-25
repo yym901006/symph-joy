@@ -6,15 +6,15 @@ import generateETag from 'etag'
 import fresh from 'fresh'
 // import { normalizePagePath } from './require'
 import { loadGetInitialProps, isResSent } from '../lib/utils'
-import Head, { defaultHead } from '../lib/head'
-import ErrorDebug from '../lib/error-debug'
+import Head, { defaultHead } from '../components/head'
+import ErrorDebug from '../components/error-debug'
 import Loadable from '../lib/loadable'
 import LoadableCapture from '../lib/loadable-capture'
 import { BUILD_MANIFEST, REACT_LOADABLE_MANIFEST, SERVER_DIRECTORY } from '../lib/constants'
 import { stringify } from 'querystring'
 
 import { create as createTempo } from '@symph/tempo'
-import { createServerRouter } from '../lib/router'
+import { createServerRouter } from '../components/router'
 
 // Based on https://github.com/jamiebuilds/react-loadable/pull/132
 function getDynamicImportBundles (manifest, moduleIds) {
@@ -104,7 +104,7 @@ async function doRender (req, res, pathname, query, {
 
   const documentPath = join(distDir, SERVER_DIRECTORY, '_document')
   // const appPath = join(distDir, SERVER_DIRECTORY, CLIENT_STATIC_FILES_PATH, buildId, 'pages', '_app')
-  let App = require('../lib/app')
+  let App = require('../components/app')
   let [buildManifest, reactLoadableManifest, Document] = await Promise.all([
     require(join(distDir, BUILD_MANIFEST)),
     require(join(distDir, REACT_LOADABLE_MANIFEST)),

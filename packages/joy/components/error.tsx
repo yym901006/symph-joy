@@ -1,14 +1,21 @@
 import React from 'react'
-import HTTPStatus from 'http-status'
+import httpStatus from 'http-status'
+// @ts-ignore
 import Head from './head'
 
-export default class Error extends React.Component {
+type ErrorProps = {
+  err: null | string | Error
+}
+
+export default class Error extends React.Component<ErrorProps> {
   render () {
     const { err } = this.props
-    const statusCode = err ? err.statusCode : null
+    // @ts-ignore
+    const statusCode: number = err ? err.statusCode : null
     const title = statusCode === 404
       ? 'This page could not be found'
-      : HTTPStatus[statusCode] || 'An unexpected error has occurred'
+      // @ts-ignore
+      : httpStatus[statusCode] || 'An unexpected error has occurred'
 
     return (
       <div style={styles.error}>
@@ -27,7 +34,7 @@ export default class Error extends React.Component {
   }
 }
 
-const styles = {
+const styles : any = {
   error: {
     color: '#000',
     background: '#fff',

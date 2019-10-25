@@ -7,12 +7,12 @@ const Fragment = React.Fragment || function Fragment ({ children }) {
   return <div>{children}</div>
 }
 
-export default class Document extends Component {
+export default class Document extends Component<any> {
   static childContextTypes = {
     _documentProps: PropTypes.any
   }
 
-  static async getInitialProps ({ renderPage }) {
+  static async getInitialProps ({ renderPage }: {renderPage: any}) {
     const { html, head, buildManifest, initStoreState } = await renderPage()
     const styles = flush()
     return { html, head, styles, buildManifest, initStoreState }
@@ -34,13 +34,13 @@ export default class Document extends Component {
   }
 }
 
-export class Head extends Component {
+interface HeadProps {
+  nonce?: string
+}
+
+export class Head extends Component<HeadProps> {
   static contextTypes = {
     _documentProps: PropTypes.any
-  }
-
-  static propTypes = {
-    nonce: PropTypes.string
   }
 
   getCssLinks () {
@@ -49,13 +49,14 @@ export class Head extends Component {
       return null
     }
 
-    return files.map((file) => {
+    return files.map((file: string) => {
       // Only render .css files here
       if (!/\.css$/.exec(file)) {
         return null
       }
 
       return (
+        // @ts-ignore
         <link
           key={file}
           nonce={this.props.nonce}
@@ -67,7 +68,7 @@ export class Head extends Component {
 
   getPreloadDynamicChunks () {
     const { dynamicImports, assetPrefix } = this.context._documentProps
-    return dynamicImports.map((bundle) => {
+    return dynamicImports.map((bundle: any) => {
       return (
         <link
           rel='preload'
@@ -92,13 +93,14 @@ export class Head extends Component {
       return null
     }
 
-    return files.map((file) => {
+    return files.map((file: string) => {
       // Only render .js files here
       if (!/\.js$/.exec(file)) {
         return null
       }
 
       return (
+        // @ts-ignore
         <link
           key={file}
           nonce={this.props.nonce}
@@ -116,7 +118,7 @@ export class Head extends Component {
 
     return (
       <head {...this.props}>
-        {(head || []).map((h, i) => React.cloneElement(h, { key: h.key || i }))}
+        {(head || []).map((h:any, i:any) => React.cloneElement(h, { key: h.key || i }))}
         {/* {page !== '/_error' && <link rel='preload' href={`${assetPrefix}/_joy/static/${buildId}/pages${pagePathname}`} as='script' nonce={this.props.nonce} />} */}
         {/* <link rel='preload' href={`${assetPrefix}/_joy/static/${buildId}/pages/_app.js`} as='script' nonce={this.props.nonce} /> */}
         {/* <link rel='preload' href={`${assetPrefix}/_joy/static/${buildId}/pages/_error.js`} as='script' nonce={this.props.nonce} /> */}
@@ -144,19 +146,20 @@ export class Main extends Component {
   }
 }
 
-export class JoyScript extends Component {
+type JoyScriptProps = {
+  nonce?: string
+}
+
+export class JoyScript extends Component<JoyScriptProps> {
   static contextTypes = {
     _documentProps: PropTypes.any
   }
 
-  static propTypes = {
-    nonce: PropTypes.string
-  }
-
   getDynamicChunks () {
     const { dynamicImports, assetPrefix } = this.context._documentProps
-    return dynamicImports.map((bundle) => {
+    return dynamicImports.map((bundle: any) => {
       return (
+        // @ts-ignore
         <script
           async
           key={bundle.file}
@@ -172,7 +175,7 @@ export class JoyScript extends Component {
       return null
     }
 
-    return files.map((file) => {
+    return files.map((file: string) => {
       // Only render .js files here
       if (!/\.js$/.exec(file)) {
         return null
@@ -188,7 +191,7 @@ export class JoyScript extends Component {
     })
   }
 
-  static getInlineScriptSource (documentProps) {
+  static getInlineScriptSource (documentProps: any) {
     const { __JOY_DATA__ } = documentProps
     const { page, pathname } = __JOY_DATA__
 
@@ -216,7 +219,7 @@ export class JoyScript extends Component {
 
     return (
       <Fragment>
-        {devFiles ? devFiles.map((file) => (
+        {devFiles ? devFiles.map((file: string) => (
           <script
             key={file} src={`${assetPrefix}/_joy/${file}`}
             nonce={this.props.nonce}

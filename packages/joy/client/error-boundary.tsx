@@ -1,14 +1,13 @@
-// @flow
-import * as React from 'react'
+import React from 'react'
 
 type ComponentDidCatchInfo = {
   componentStack: string
 }
 
-type Props = {|
+type Props = {
   onError: (error: Error, info: ComponentDidCatchInfo) => void,
-  children: React.ComponentType<*>
-|}
+  children: React.Component
+}
 
 class ErrorBoundary extends React.Component<Props> {
   componentDidCatch (error: Error, info: ComponentDidCatchInfo) {

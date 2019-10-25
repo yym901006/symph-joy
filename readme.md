@@ -1,0 +1,1 @@
+packages/joy/docs/getting-started.md

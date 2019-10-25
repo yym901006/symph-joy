@@ -1,15 +1,13 @@
-// @flow
-import type { ElementType } from 'react'
-
-import React from 'react'
-import Loadable from './loadable'
+import React, {ElementType} from 'react'
+// @ts-ignore
+import Loadable from '../lib/loadable'
 
 type ImportedComponent = Promise<null|ElementType>
 
 type ComponentMapping = {[componentName: string]: ImportedComponent}
 
 type JoyDynamicOptions = {
-  loader?: ComponentMapping | () => ImportedComponent,
+  loader?: ComponentMapping | (() => ImportedComponent),
   loading: ElementType,
   timeout?: number,
   delay?: number,
@@ -23,8 +21,8 @@ type JoyDynamicOptions = {
 }
 
 type LoadableOptions = {
-  loader?: ComponentMapping | () => ImportedComponent,
-  loading: ElementType,
+  loader?: ComponentMapping | (() => ImportedComponent),
+  loading: React.ElementType,
   timeout?: number,
   delay?: number,
   render?: (props: any, loaded: {[componentName: string]: ElementType}) => ElementType,
@@ -84,7 +82,7 @@ export default function dynamic (dynamicOptions: any, options: JoyDynamicOptions
   // Support for `render` when using a mapping, eg: `dynamic({ modules: () => {return {HelloWorld: import('../hello-world')}, render(props, loaded) {} } })
   if (dynamicOptions.render) {
     loadableOptions.render = (loaded, props) => {
-      const _loaded = {}
+      const _loaded:any = {}
       Object.keys(loaded).forEach(key => {
         _loaded[key] = loaded[key].default || loaded[key]
       })
@@ -94,8 +92,8 @@ export default function dynamic (dynamicOptions: any, options: JoyDynamicOptions
   // Support for `modules` when using a mapping, eg: `dynamic({ modules: () => {return {HelloWorld: import('../hello-world')}, render(props, loaded) {} } })
   if (dynamicOptions.modules) {
     loadableFn = Loadable.Map
-    const loadModules = {}
-    let modules
+    const loadModules: any = {}
+    let modules: any
     if (typeof dynamicOptions.modules === 'function') {
       modules = dynamicOptions.modules()
     } else {
@@ -104,7 +102,7 @@ export default function dynamic (dynamicOptions: any, options: JoyDynamicOptions
     Object.keys(modules).forEach(key => {
       const value = modules[key]
       if (typeof value.then === 'function') {
-        loadModules[key] = () => value.then(mod => mod.default || mod)
+        loadModules[key] = () => value.then((mod: any) => mod.default || mod)
         return
       }
       loadModules[key] = value

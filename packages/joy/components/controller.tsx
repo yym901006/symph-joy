@@ -1,14 +1,24 @@
 import React from 'react'
-import * as controller from '@symph/tempo/controller'
+// @ts-ignore
+import * as tempoController from '@symph/tempo/controller'
 import { Route } from './router'
 import PropTypes from 'prop-types'
 import hoistStatics from 'hoist-non-react-statics'
 
+type mapModelToProps = (modelState: Object, ownProps?: Object) => Object | null
+
 /**
  * react-router: Dealing with Update Blocking
  */
-function withRouter (Component) {
-  class Wrapper extends React.PureComponent {
+export function withRouter (Component: React.ComponentType<any>): React.ComponentType<any> {
+  class Wrapper extends React.PureComponent<any> {
+    static displayName: string
+    static WrappedComponent: React.ComponentType
+
+    propTypes = {
+      wrappedComponentRef: PropTypes.func
+    }
+
     render () {
       const { wrappedComponentRef, ...remainingProps } = this.props
       return (
@@ -27,18 +37,12 @@ function withRouter (Component) {
 
   Wrapper.displayName = `withRouter(${Component.displayName || Component.name})`
   Wrapper.WrappedComponent = Component
-
-  if (process.env.NODE_ENV !== 'production') {
-    Wrapper.propTypes = {
-      wrappedComponentRef: PropTypes.func
-    }
-  }
   return hoistStatics(Wrapper, Component)
 }
 
-const originalController = controller.controller
-const enhanceController = function (mapStateToProps, { hotLoader, enhance } = {}) {
-  function _enhance (enhancers) {
+const originalController = tempoController.controller
+export const controller = function (mapStateToProps: mapModelToProps, { hotLoader, enhance }:{hotLoader?: any,enhance?:any}={} ) {
+  function _enhance (enhancers: any[]) {
     if (hotLoader) {
       // 添加react-hot-loader在所有高阶封装之前，否则不会生效
       // hotLoader参数，一般来至于joy-react-hot-loader-label-plugin.js在调试模式下自动添加
@@ -60,7 +64,7 @@ const enhanceController = function (mapStateToProps, { hotLoader, enhance } = {}
 
   return originalController(mapStateToProps, { enhance: _enhance })
 }
-controller.controller = enhanceController
+tempoController.controller = controller
 
-module.exports = controller
-module.exports.default = enhanceController
+
+export default controller

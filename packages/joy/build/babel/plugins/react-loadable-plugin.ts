@@ -28,12 +28,13 @@ import { NodePath } from '@babel/traverse'
 import * as BabelTypes from '@babel/types'
 import filePath from 'path'
 import crypto from 'crypto'
+import { StringLiteral } from 'babel-types'
 const dev = process.env.NODE_ENV === 'development'
 
 export default function ({ types: t }: {types: typeof BabelTypes}): PluginObj {
   return {
     visitor: {
-      ImportDeclaration (path: NodePath<BabelTypes.ImportDeclaration>, state) {
+      ImportDeclaration (path: NodePath<BabelTypes.ImportDeclaration>, state: any) {
         const source = path.node.source.value
         if (source !== '@symph/joy/dynamic' && source !== 'react-loadable') return
         const filename = state.filename
@@ -134,10 +135,12 @@ export default function ({ types: t }: {types: typeof BabelTypes}): PluginObj {
               if (!dev) {
                 moduleId = crypto.createHash('md5').update(moduleId).digest('hex')
               }
+
+              // @ts-ignore
               modules.push({
                 type: 'StringLiteral',
                 value: moduleId
-              })
+              } )
             }
           })
 

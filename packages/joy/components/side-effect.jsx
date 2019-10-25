@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { getDisplayName } from './utils'
+import { getDisplayName } from '../lib/utils'
 
 export default function withSideEffect (reduceComponentsToState, handleStateChangeOnClient, mapStateOnServer) {
   if (typeof reduceComponentsToState !== 'function') {

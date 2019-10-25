@@ -1,19 +1,18 @@
 import { PluginObj } from '@babel/core'
 import { NodePath } from '@babel/traverse'
 import * as BabelTypes from '@babel/types'
-import { ImportDeclaration } from 'babel-types'
 
-export default function ({ types: t }: { types: any }, { autoBinding = false }): PluginObj {
+export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingding = false }): PluginObj {
   return {
     pre: (file) => {
       let importAutowire
-      let decorAutowire
+      let decorAutowire:any
       const identifyAutowire = t.identifier('autowire')
       file.path.traverse({
-        'ImportDeclaration': (importPath: NodePath<ImportDeclaration>) => {
+        ImportDeclaration (importPath: any) {
           if (importPath.node.source.value === '@symph/joy/autowire' || importPath.node.source.value === '@symph/tempo/autowire') {
             importAutowire = importPath
-            decorAutowire = importPath.get('specifiers').find(item =>
+            decorAutowire = importPath.get('specifiers').find((item: any) =>
               item.node.type === 'ImportDefaultSpecifier' || (item.node.imported && item.get('imported.name').node === 'autowire')
             )
           }
@@ -23,23 +22,23 @@ export default function ({ types: t }: { types: any }, { autoBinding = false }):
 
       // add '@autowire()' decoration on model props, if not exist
       file.path.traverse({
-        ClassDeclaration (clazz: NodePath<BabelTypes.ClassDeclaration>) {
+        ClassDeclaration (clazz: any) {
           clazz.traverse({
-            ClassProperty (classProperty: NodePath<BabelTypes.ClassProperty>) {
-              if (classProperty.get('decorators').length && classProperty.get('decorators').find(function (item) {
+            ClassProperty (classProperty: any) {
+              if (classProperty.get('decorators').length && classProperty.get('decorators').find(function (item: any) {
                 return item.get('expression').isIdentifier() && item.get('expression.name').node === decorAutowire.node.local.name
               })) {
                 throw new Error(`autowire decorator must called as a function, such as '@autowire()' on ${clazz.node.id.name}.${classProperty.node.key.name}`)
               }
 
               const propType = classProperty.node.typeAnnotation && classProperty.get('typeAnnotation.typeAnnotation.typeName')
-              const autowire = classProperty.get('decorators').length && classProperty.get('decorators').find(item =>
+              const autowire = classProperty.get('decorators').length && classProperty.get('decorators').find((item: any) =>
                 item.get('expression').isCallExpression() && item.get('expression.callee.name').node === decorAutowire.node.local.name
               )
               if (autowire && autowire.node) {
                 // add 'type' to decorator params，if not exist
                 let typeParam = autowire.node.expression.arguments.length > 0 && autowire.node.expression.arguments[0].properties &&
-                  autowire.get('expression.arguments.0.properties').find(item => item.node.key.name === 'type')
+                  autowire.get('expression.arguments.0.properties').find((item: any) => item.node.key.name === 'type')
                 if (typeParam && typeParam.node) {
                   // all is ready, do nothing
 

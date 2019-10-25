@@ -1,14 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import HeadManager from './head-manager'
-import { createClientRouter } from '../lib/router'
+import { createClientRouter } from '../components/router'
 import EventEmitter from '../lib/EventEmitter'
 import { create as createTempo } from '@symph/tempo'
 import { createBrowserHistory } from 'history'
 import { connectRouter, routerMiddleware } from 'connected-react-router'
 import ErrorBoundary from './error-boundary'
 import Loadable from '../lib/loadable'
-import App from '../lib/app'
+import App from '../components/app'
 
 const {
   __JOY_DATA__: {

@@ -1,11 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import shallowEquals from './shallow-equals'
-import { loadGetInitialProps } from './utils'
+import {isShallowEqual} from '../lib/shallow-equals'
+import { loadGetInitialProps } from '../lib/utils'
 // import { makePublicRouterInstance } from './router'
+// @ts-ignore
 import { Provider } from '@symph/tempo/provider'
 
-class App extends Component {
+type Props = {
+  headManager: any,
+  tempo: any,
+  Component: React.ComponentType,
+  appContentProps: any,
+  Router: any,
+}
+
+class App extends React.Component<Props> {
   static childContextTypes = {
     _containerProps: PropTypes.any,
     headManager: PropTypes.object
@@ -14,7 +23,7 @@ class App extends Component {
 
   static displayName = 'App'
 
-  static async getInitialProps ({ Component, router, ctx }) {
+  static async getInitialProps ({ Component, ctx }: {Component: any, ctx: any}) {
     const pageProps = await loadGetInitialProps(Component, ctx)
     return { pageProps }
   }
@@ -42,7 +51,7 @@ class App extends Component {
 
   // Kept here for backwards compatibility.
   // When someone ended App they could call `super.componentDidCatch`. This is now deprecated.
-  componentDidCatch (err) {
+  componentDidCatch (err: any) {
     throw err
   }
 
@@ -60,7 +69,7 @@ class App extends Component {
   }
 }
 
-export class Container extends Component {
+export class Container extends React.Component {
   static contextTypes = {
     _containerProps: PropTypes.any
   }
@@ -69,9 +78,9 @@ export class Container extends Component {
     this.scrollToHash()
   }
 
-  shouldComponentUpdate (joyProps) {
+  shouldComponentUpdate (nextJoyProps: any) {
     // need this check not to rerender component which has already thrown an error
-    return !shallowEquals(this.props, joyProps)
+    return !isShallowEqual(this.props, nextJoyProps)
   }
 
   componentDidUpdate () {

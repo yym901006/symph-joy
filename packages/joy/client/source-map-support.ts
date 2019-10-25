@@ -1,4 +1,3 @@
-// @flow
 const filenameRE = /\(([^)]+\.js):(\d+):(\d+)\)$/
 
 export function rewriteStacktrace (e: any, distDir: string): void {
@@ -8,7 +7,7 @@ export function rewriteStacktrace (e: any, distDir: string): void {
 
   const lines = e.stack.split('\n')
 
-  const result = lines.map((line) => {
+  const result = lines.map((line: any) => {
     return rewriteTraceLine(line, distDir)
   })
 

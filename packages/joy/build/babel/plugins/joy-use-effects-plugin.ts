@@ -1,20 +1,20 @@
 import { PluginObj } from '@babel/core'
 import * as BabelTypes from '@babel/types'
 
-export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingding = false }): PluginObj {
+export default function ({ types: t }: { types: typeof BabelTypes }, { autoBinding = false }): PluginObj {
   return {
     pre: (file) => {
-      let useEffectImportSpecifier, importReact, useJoyEffectImportSpecifier, importHook
+      let useEffectImportSpecifier: any, importReact: any, useJoyEffectImportSpecifier: any, importHook: any
       file.path.traverse({
-        ImportDeclaration (importPath) {
+        ImportDeclaration (importPath: any) {
           if (importPath.node.source.value === 'react') {
             importReact = importPath
-            useEffectImportSpecifier = importPath.get('specifiers').find(item =>
+            useEffectImportSpecifier = importPath.get('specifiers').find((item: any) =>
               (item.node.imported && item.get('imported.name').node === 'useEffect')
             )
           } else if (importPath.node.source.value === '@symph/joy/hook' || importPath.node.source.value === '@symph/tempo/hook') {
             importHook = importPath
-            useJoyEffectImportSpecifier = importPath.get('specifiers').find(item =>
+            useJoyEffectImportSpecifier = importPath.get('specifiers').find((item: any) =>
               (item.node.imported && item.get('imported.name').node === 'useEffect')
             )
           }
@@ -35,11 +35,11 @@ export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingd
 
       // replace react.useEffects to @symph/tempo/hooks.userEffects
       file.path.traverse({
-        Identifier (path) {
+        Identifier (path: any) {
           if (!path.isIdentifier({ name: useEffectImportSpecifier.node.local.name })) {
             return
           }
-          if (path.findParent(p => p.isImportDeclaration())) {
+          if (path.findParent((p: any) => p.isImportDeclaration())) {
             // 在import语句中，不处理
             return
           }
@@ -47,6 +47,7 @@ export default function ({ types: t }: { types: typeof BabelTypes }, { autoBingd
           file.path.scope.getBinding(useJoyEffectImportSpecifier.node.local.name).reference(path)
         }
       })
-    }
+    },
+    visitor: {}
   }
 }
