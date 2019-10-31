@@ -1,16 +1,48 @@
 const notifier = require('node-notifier')
-// const childProcess = require('child_process')
-// const rimraf = require('rimraf')
-// const mkdirp = require('mkdirp')
-// const isWindows = /^win/.test(process.platform)
+const relative = require('path').relative
 
-export async function compile (task) {
-  await task.parallel(['src'])
+const babelOpts = {
+  presets: [
+    '@babel/preset-typescript',
+    [
+      '@babel/preset-env',
+      {
+        modules: 'commonjs',
+        targets: {
+          esmodules: true
+        },
+        loose: true,
+        exclude: ['transform-typeof-symbol']
+      }
+    ],
+    '@babel/preset-react'
+  ],
+  plugins: [
+    ['@babel/plugin-proposal-class-properties', { loose: true }],
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        corejs: 2,
+        helpers: true,
+        regenerator: false,
+        useESModules: false
+      }
+    ]
+  ]
 }
 
 export async function src (task, opts) {
-  await task.source(opts.src || 'src/**/*.js').babel().target('dist/')
+  await task
+    .source(opts.src || 'src/**/*.+(js|ts|tsx)')
+    .babel(babelOpts)
+    .target('dist')
   notify('Compiled src files')
+}
+
+export async function compile (task) {
+  await task.parallel([
+    'src'
+  ])
 }
 
 export async function build (task) {
@@ -18,8 +50,9 @@ export async function build (task) {
 }
 
 export default async function (task) {
+  await task.clear('dist')
   await task.start('build')
-  await task.watch('src/**/*.js', 'src')
+  await task.watch('src/**/*.+(js|ts|tsx)', 'src')
 }
 
 export async function release (task) {
@@ -29,7 +62,7 @@ export async function release (task) {
 // notification helper
 function notify (msg) {
   return notifier.notify({
-    title: '▲ @symph/tempo',
+    title: '▲ @symph/temp',
     message: msg,
     icon: false
   })

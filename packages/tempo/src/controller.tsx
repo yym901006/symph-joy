@@ -3,24 +3,26 @@ import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { isReactClass, shallowEqual } from './utils'
 
+type mapModelToProps = null | ((modelState: Object, ownProps?: Object) => Object)
+
 /**
  * 将react 组件封装为controller组件
  * @param mapStateToProps
  * @param enhance 对Controller进行再次封装，默认有redux connect。 @symph/joy默认提供：with-router, react-hot-loader
  * @returns connect Redux后的HOC
  */
-function controller (mapStateToProps, { enhance } = {}) {
-  return Comp => {
-    const modelFields = Comp.elements.filter(el => el.descriptor.get && el.descriptor.get.__ModelType)
+function controller (mapStateToProps: mapModelToProps, { enhance }:{enhance?: Function | null }={}) {
+  return (Comp: any) => {
+    const modelFields = Comp.elements.filter((el: any) => el.descriptor.get && el.descriptor.get.__ModelType)
 
-    Comp.finisher = function (_constructor) {
+    Comp.finisher = function (_constructor: any) {
       class ControllerWrapper extends _constructor {
         static contextTypes = {
           tempo: PropTypes.object,
           ..._constructor.contextTypes
         }
 
-        constructor (...args) {
+        constructor (...args: any) {
           super(...args)
           const context = args[1]
           const { tempo } = context
@@ -52,7 +54,7 @@ function controller (mapStateToProps, { enhance } = {}) {
         }
 
         // 服务端渲染时，不可调用setState方法，设置不会生效，会导致服务端和浏览器上渲染的结果不一致
-        setState (...args) {
+        setState (...args: any) {
           if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
             const displayName = _constructor.displayName || _constructor.name || 'Component'
             throw new Error(`Controller(${displayName}): can't call setState during componentPrepare, this will not work on ssr`)
@@ -69,11 +71,11 @@ function controller (mapStateToProps, { enhance } = {}) {
         enhancers = enhance(enhancers) || enhancers
       }
 
-      let EnhancedComp = ControllerWrapper
+      let EnhancedComp: any = ControllerWrapper
 
       if (enhancers && enhancers.length > 0) {
         let hasConnectHOC = false
-        enhancers.forEach((enhancer) => {
+        enhancers.forEach((enhancer: any) => {
           EnhancedComp = enhancer(EnhancedComp)
           if ((typeof EnhancedComp === 'undefined') || EnhancedComp === null) {
             throw new Error('the enhance must return a React.Component or React.PureComponent')
@@ -99,28 +101,27 @@ function controller (mapStateToProps, { enhance } = {}) {
   }
 }
 
-function injectModelsToProps (Comp, modelFieldDescriptors) {
+function injectModelsToProps (Comp: React.ComponentType, modelFieldDescriptors: any) {
   // get joy state from store
-  const joyWrapMapStateToProps = (store, ownProps) => {
-    const joyProps = {
+  const joyWrapMapStateToProps = (store: any, ownProps: any) => {
+    return {
       _joyStoreState: store
     }
-    return joyProps
   }
 
-  class ModelWrapper extends React.Component {
+  class ModelWrapper extends React.Component<any> {
     static contextTypes = {
       tempo: PropTypes.object
     }
 
-    constructor (props, context) {
-      super(...arguments)
+    constructor (props: any, context: any) {
+      super(props, context)
       const { _joyStoreState } = props
       const { tempo } = context
 
       // register bind models
       if (modelFieldDescriptors && modelFieldDescriptors.length > 0) {
-        modelFieldDescriptors.forEach((modelField) => {
+        modelFieldDescriptors.forEach((modelField: any) => {
           const modelClass = modelField.descriptor.get.__ModelType
           tempo.model(modelClass)
         })
@@ -131,7 +132,7 @@ function injectModelsToProps (Comp, modelFieldDescriptors) {
       }
     }
 
-    shouldComponentUpdate (nextProps, nextState, nextContext) {
+    shouldComponentUpdate (nextProps: any, nextState: any, nextContext: any) {
       if (!shallowEqual(this.props._joyStoreState, nextProps._joyStoreState)) {
         return !shallowEqual(this.props, nextProps, { exclude: ['_joyStoreState'] })
       }
@@ -147,6 +148,7 @@ function injectModelsToProps (Comp, modelFieldDescriptors) {
         _componentHasPrepared: isPrepared,
         _joyStoreState: undefined
       }
+      // @ts-ignore
       return <Comp {...childProps} tempo={this.context.tempo} />
     }
   }
@@ -170,22 +172,21 @@ function injectModelsToProps (Comp, modelFieldDescriptors) {
  * @param models array
  * @returns {function(*)}
  */
-function requireModel (...models) {
-  return Comp => {
+function requireModel (...models: Array<any>) {
+  return (Comp: any) => {
     if (!models || models.length === 0) {
       return
     }
 
-    Comp.finisher = function (_constructor) {
+    Comp.finisher = function (_constructor: React.ComponentClass<any>) {
       class Wrapper extends _constructor {
         static contextTypes = {
           tempo: PropTypes.object,
           ..._constructor.contextTypes
         }
 
-        constructor (...args) {
-          super(...args)
-          const [props, context] = args
+        constructor (props: any, context: any) {
+          super(props, context)
           const { storeState } = props
           const { tempo } = context
 
@@ -216,7 +217,7 @@ function requireModel (...models) {
   }
 }
 
-function getCompDisplayName (Comp) {
+function getCompDisplayName (Comp: React.ComponentType) {
   return Comp.displayName || Comp.name
 }
 

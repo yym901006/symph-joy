@@ -1,6 +1,6 @@
 {
   "name": "@symph/tempo",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "MVC React app framework, based on Redux",
   "main": "dist/index.js",
   "license": "MIT",
@@ -18,13 +18,14 @@
   "scripts": {
     "build": "taskr",
     "release": "taskr release",
-    "lint": "standard  'src/**/*.js'",
-    "prepublish": "npm run release",
-    "precommit": "lint-staged"
+    "prepublish": "yarn run release && yarn types",
+    "types": "tsc --declaration --emitDeclarationOnly --declarationDir dist",
+    "typescript": "tsc --noEmit --declaration"
   },
   "taskr": {
     "requires": [
-      "./taskfile-babel.js"
+      "./taskfile-babel.js",
+      "./taskfile-typescript.js"
     ]
   },
   "standard": {
@@ -69,7 +70,6 @@
     "@babel/runtime": "7.6.0",
     "@babel/runtime-corejs2": "7.6.0",
     "@babel/template": "7.6.0",
-    "@taskr/babel": "1.1.0-next.1",
     "@taskr/clear": "1.1.0",
     "@taskr/esnext": "1.1.0",
     "@taskr/watch": "1.1.0",

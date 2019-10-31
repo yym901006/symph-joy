@@ -1,6 +1,6 @@
 {
   "name": "basic",
-  "private": true,
+  "version": "1.0.0",
   "scripts": {
     "dev": "joy dev",
     "build": "NODE_ENV=production joy build",
@@ -12,8 +12,7 @@
     "@symph/joy-image": "latest",
     "@symph/joy-less": "latest",
     "less": "^3.8.1",
-    "prop-types": "^15.6.2",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react": "^16.11.0",
+    "react-dom":  "^16.11.0"
   }
 }

@@ -2,8 +2,8 @@ import React from 'react'
 import _isPlainObject from 'is-plain-object'
 export const isPlainObject = _isPlainObject
 export const isArray = Array.isArray.bind(Array)
-export const isFunction = o => typeof o === 'function'
-export const returnSelf = m => m
+export const isFunction = (o: any) => typeof o === 'function'
+export const returnSelf = (m: any) => m
 export const noop = () => {}
 
 /**
@@ -12,7 +12,7 @@ export const noop = () => {}
  * @param {String} message The warning message.
  * @returns {void}
  */
-export function warning (message) {
+export function warning (message: any) {
   /* eslint-disable no-console */
   if (typeof console !== 'undefined' && typeof console.error === 'function') {
     console.error(message)
@@ -28,7 +28,7 @@ export function warning (message) {
 
 const hasOwn = Object.prototype.hasOwnProperty
 
-function is (x, y) {
+function is (x: any, y: any) {
   if (x === y) {
     return x !== 0 || y !== 0 || 1 / x === 1 / y
   } else {
@@ -40,22 +40,27 @@ function is (x, y) {
  *
  * @param objA
  * @param objB
- * @param exclude  这些属性，不参与比较
+ * @param exclude  这些属性，不参与参与比较
  * @returns {boolean}
  */
-export function shallowEqual (objA, objB, { exclude = [] } = {}) {
+export function shallowEqual (objA: any, objB: any, { exclude }:{exclude?:Array<any>}={}): boolean {
   if (is(objA, objB)) return true
 
   if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
     return false
   }
 
-  const keysA = Object.keys(objA).filter(i => !exclude.includes(i))
-  const keysB = Object.keys(objB).filter(i => !exclude.includes(i))
+  let keysA = Object.keys(objA)
+  let keysB = Object.keys(objB)
+  if (exclude && exclude.length > 0) {
+    keysA = keysA.filter((i: any) => !exclude.includes(i))
+    keysB = keysB.filter((i: any) => !exclude.includes(i))
+  }
   if (keysA.length !== keysB.length) return false
 
   for (var i = 0; i < keysA.length; i++) {
     if (!hasOwn.call(objB, keysA[i]) || !is(objA[keysA[i]], objB[keysA[i]])) {
+      // console.log('>>>> prop no equat', keysA[i])
       return false
     }
   }
@@ -63,7 +68,8 @@ export function shallowEqual (objA, objB, { exclude = [] } = {}) {
   return true
 }
 
-export function isReactClass (Component) {
+
+export function isReactClass (Component: any) {
   return !!(Component.prototype &&
     (Object.prototype.isPrototypeOf.call(React.Component.prototype, Component.prototype) ||
       Component.prototype.isReactComponent || // react 14 support

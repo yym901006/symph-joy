@@ -2,64 +2,45 @@
 // https://github.com/lukeed/taskr/pull/305
 'use strict'
 
+const extname = require('path').extname
 const transform = require('@babel/core').transform
-const flatten = require('flatten')
-
-const BABEL_REGEX = /(^@babel\/)(preset|plugin)-(.*)/i
-
-function getBabels () {
-  const pkg = require('./package.json')
-  return flatten(
-    ['devDependencies', 'dependencies'].map(s => Object.keys(pkg[s] || {}))
-  ).filter(s => BABEL_REGEX.test(s))
-}
 
 module.exports = function (task) {
-  let cache
+  task.plugin('babel', {}, function * (file, babelOpts, { stripExtension } = {}) {
+    const options = {
+      ...babelOpts,
+      compact: true,
+      babelrc: false,
+      configFile: false,
+      filename: file.base
+    }
+    const output = transform(file.data, options)
+    const ext = extname(file.base)
+    // Include declaration files as they are
+    if (file.base.endsWith('.d.ts')) return
 
-  task.plugin('babel', {}, function * (file, opts) {
-    if (opts.preload) {
-      delete opts.preload
-      // get dependencies
-      cache = cache || getBabels()
-
-      // attach any deps to babel's `opts`
-      cache.forEach(dep => {
-        const segs = BABEL_REGEX.exec(dep)
-        const type = `${segs[2]}s`
-        const name = `@babel/${segs[2]}-${segs[3]}`
-
-        opts[type] = opts[type] || []
-
-        // flatten all (advanced entries are arrays)
-        if (flatten(opts[type]).indexOf(name) === -1) {
-          opts[type] = opts[type].concat(name)
-        }
-      })
+    // Replace `.ts|.tsx` with `.js` in files with an extension
+    if (ext) {
+      const extRegex = new RegExp(ext.replace('.', '\\.') + '$', 'i')
+      // Remove the extension if stripExtension is enabled or replace it with `.js`
+      file.base = file.base.replace(extRegex, stripExtension ? '' : '.js')
     }
 
-    // attach file's name
-    opts.filename = file.base
-
-    const output = transform(file.data, opts)
-
-    if (output.map) {
-      const map = `${file.base}.map`
-
-      // append `sourceMappingURL` to original file
-      if (opts.sourceMaps !== 'both') {
-        output.code += Buffer.from(`\n//# sourceMappingURL=${map}`)
-      }
-
-      // add sourcemap to `files` array
-      this._.files.push({
-        base: map,
-        dir: file.dir,
-        data: Buffer.from(JSON.stringify(output.map))
-      })
+    // Workaround for noop.js loading
+    if (file.base === 'joy-dev.js') {
+      output.code = output.code.replace(
+        '// REPLACE_NOOP_IMPORT',
+        `import('./dev/noop');`
+      )
     }
 
-    // update file's data
-    file.data = Buffer.from(output.code)
+    file.data = Buffer.from(setNextVersion(output.code))
   })
+}
+
+function setNextVersion (code) {
+  return code.replace(
+    /process\.env\.__NEXT_VERSION/g,
+    `"${require('./package.json').version}"`
+  )
 }

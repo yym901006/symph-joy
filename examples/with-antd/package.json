@@ -1,6 +1,5 @@
 {
   "name": "with-antd",
-  "private": true,
   "version": "1.0.0",
   "description": "集成*antd-design* UI框架示例",
   "engines": {

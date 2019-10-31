@@ -2,10 +2,11 @@
  * 申明一个字段是一个依赖注入的字段
  * @param type 字段的类型，一个Class
  */
-function autowire ({ type: ModelType }) {
-  return function (target) {
+function autowire ({ type: ModelType }: {type: any}) {
+  return function (target: any) {
     const { key } = target
     const getter = function () {
+      // @ts-ignore
       const tempo = this.tempo || (this.props && this.props.tempo)
       if (tempo) {
         return tempo.diObjects[ModelType.namespace]
